@@ -1,0 +1,348 @@
+import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'item.dart';
+//change
+
+class Home extends StatefulWidget {
+  const Home({super.key});
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  double _sum = 0.0;
+  bool _showSelected = false;
+  bool _showSearch = false;
+  TextEditingController _searchController = TextEditingController();
+  List<Item> _filteredItems = [];
+  int _currentImageIndex = 0;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredItems = items;
+    _searchController.addListener(filterItems);
+
+    _timer = Timer.periodic(Duration(seconds: 5), (Timer t) {
+      setState(() {
+        _currentImageIndex = (_currentImageIndex + 1) % _filteredItems.length;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(filterItems);
+    _searchController.dispose();
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void filterItems() {
+    List<Item> _items = items.where((item) {
+      return item.name.toLowerCase().contains(_searchController.text.toLowerCase());
+    }).toList();
+
+    setState(() {
+      _filteredItems = _items;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    if (MediaQuery.of(context).orientation == Orientation.landscape)
+      screenWidth = screenWidth * 0.8;
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.red[900],
+        title: _showSearch
+            ? Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                style: TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'Search...',
+                  hintStyle: TextStyle(color: Colors.white),
+                  border: InputBorder.none,
+                ),
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.close, color: Colors.white),
+              onPressed: () {
+                setState(() {
+                  _showSearch = false;
+                  _searchController.clear();
+                  _filteredItems = items;
+                });
+              },
+            ),
+          ],
+        )
+            : Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                SizedBox(width: 10),
+                Image.asset(
+                  'assets/cropped-hiperao.png',
+                  height: 30,
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                IconButton(
+                  icon: Icon(Icons.search, color: Colors.black),
+                  onPressed: () {
+                    setState(() {
+                      _showSearch = true;
+                    });
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.person, color: Colors.black),
+                  onPressed: () {
+                    // Handle the person button press
+                  },
+                ),
+                Stack(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.shopping_cart, color: Colors.black),
+                      onPressed: () {
+                        // Handle the cart button press
+                      },
+                    ),
+                    Positioned(
+                      right: 0,
+                      child: CircleAvatar(
+                        radius: 8,
+                        backgroundColor: Colors.black,
+                        child: Text(
+                          '0', // Update this number dynamically
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.red[900],
+              ),
+              child: Image.asset(
+                'assets/cropped-hiperao.png',
+                height: 30,
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text('Profile'),
+              onTap: () {
+                // Handle profile option tap
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.category),
+              title: Text('Categories'),
+              onTap: () {
+                // Handle categories option tap
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.info),
+              title: Text('About us'),
+              onTap: () {
+                // Handle about us option tap
+              },
+            ),
+          ],
+        ),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: _showSelected
+                ? ShowSelectedItems(width: screenWidth)
+                : _filteredItems.isEmpty
+                ? Center(
+              child: Text(
+                'Product not found',
+                style: TextStyle(fontSize: 24, color: Colors.red),
+              ),
+            )
+                : ListView(
+              children: [
+                SizedBox(
+                  height: 100, // Height of your SizedBox
+                  child: Center(
+                    child: Image.network(
+                      _filteredItems[_currentImageIndex].image,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(20.0),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 20.0,
+                    mainAxisSpacing: 20.0,
+                  ),
+                  itemCount: _filteredItems.length,
+                  itemBuilder: (context, index) {
+                    return Card(
+                      elevation: 5,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          CheckboxListTile(
+                            value: _filteredItems[index].selected,
+                            onChanged: (e) {
+                              setState(() {
+                                _filteredItems[index].selected = e ?? false;
+                                if (_filteredItems[index].selected) {
+                                  _sum += _filteredItems[index].price;
+                                } else {
+                                  _sum -= _filteredItems[index].price;
+                                }
+                              });
+                            },
+                            title: Text(
+                              _filteredItems[index].toString(),
+                              style: TextStyle(fontSize: 18.0),
+                            ),
+                          ),
+                          Image.network(
+                            _filteredItems[index].image,
+                            height: 80,
+                            width: 80,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                Footer(), // The footer widget
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class ShowSelectedItems extends StatelessWidget {
+  final double width;
+  const ShowSelectedItems({super.key, required this.width});
+
+  @override
+  Widget build(BuildContext context) {
+    List<Item> selectedItems = [];
+    for (var e in items) {
+      if (e.selected) {
+        selectedItems.add(e);
+      }
+    }
+    return GridView.builder(
+      padding: const EdgeInsets.all(20.0),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 20.0,
+        mainAxisSpacing: 20.0,
+      ),
+      itemCount: selectedItems.length,
+      itemBuilder: (context, index) {
+        return Card(
+          elevation: 5,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                selectedItems[index].name,
+                style: const TextStyle(fontSize: 18),
+              ),
+              Image.network(
+                selectedItems[index].image,
+                height: width * 0.3,
+                fit: BoxFit.cover,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class Footer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(0.5),
+      color: Colors.red[900],
+      child: Column(
+        children: [
+        Text(
+        'Contact Us: - +961 81 605 882 // - +961 81 076 902',
+        style: TextStyle(color: Colors.white, fontSize: 16),
+      ),
+      SizedBox(height: 8),
+      Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+      IconButton(
+      icon: Icon(Icons.phone, color: Colors.black),
+      onPressed: () {
+        // Handle phone button press
+      },
+    ),
+    IconButton(
+    icon: Icon(Icons.facebook, color: Colors.black),
+    onPressed: () {
+    // Handle Facebook button press
+    },
+    ),
+            IconButton(
+              icon: FaIcon(FontAwesomeIcons.whatsapp, color: Colors.black),
+              onPressed: () {
+                // Handle WhatsApp button press
+              },
+            ),
+            IconButton(
+              icon: FaIcon(FontAwesomeIcons.instagram, color: Colors.black), // Replace with Instagram icon
+              onPressed: () {
+                // Handle Instagram button press
+              },
+            ),
+          ],
+      ),
+        ],
+      ),
+    );
+  }
+}
