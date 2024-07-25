@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'item.dart';
-
+import 'showselected.dart'
+    '';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -13,7 +14,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   double _sum = 0.0;
-  int iteamselected=0;
+  int itemselected = 0;
   bool _showSelected = false;
   bool _showSearch = false;
   TextEditingController _searchController = TextEditingController();
@@ -52,11 +53,25 @@ class _HomeState extends State<Home> {
     });
   }
 
+  void updateSelectedItems() {
+    setState(() {
+      _sum = items.where((item) => item.selected).fold(0.0, (sum, item) => sum + item.price * item.quantity);
+      itemselected = items.where((item) => item.selected).length;
+    });
+  }
+
+  void returnToHome() {
+    setState(() {
+      _showSelected = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    if (MediaQuery.of(context).orientation == Orientation.landscape)
+    if (MediaQuery.of(context).orientation == Orientation.landscape) {
       screenWidth = screenWidth * 0.8;
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -134,7 +149,7 @@ class _HomeState extends State<Home> {
                         radius: 8,
                         backgroundColor: Colors.black,
                         child: Text(
-                          '$iteamselected', // Update this number dynamically
+                          '$itemselected', // Update this number dynamically
                           style: TextStyle(
                             fontSize: 10,
                             color: Colors.white,
@@ -190,7 +205,11 @@ class _HomeState extends State<Home> {
         children: [
           Expanded(
             child: _showSelected
-                ? ShowSelectedItems(width: screenWidth)
+                ? ShowSelectedItems(
+              width: screenWidth,
+              updateSelectedItems: updateSelectedItems,
+              returnToHome: returnToHome,
+            )
                 : _filteredItems.isEmpty
                 ? Center(
               child: Text(
@@ -232,11 +251,11 @@ class _HomeState extends State<Home> {
                               if (items[index].selected) {
                                 // add its price to total price
                                 _sum += items[index].price;
-                                iteamselected++;
+                                itemselected++;
                               } else {
                                 // subtract its price from total price
                                 _sum -= items[index].price;
-                                iteamselected--;
+                                itemselected--;
                               }
                               setState(() {});
                             },
@@ -265,48 +284,6 @@ class _HomeState extends State<Home> {
   }
 }
 
-class ShowSelectedItems extends StatelessWidget {
-  final double width;
-  const ShowSelectedItems({super.key, required this.width});
-
-  @override
-  Widget build(BuildContext context) {
-    List<Item> selectedItems = [];
-    for (var e in items) {
-      if (e.selected) {
-        selectedItems.add(e);
-      }
-    }
-    return GridView.builder(
-      padding: const EdgeInsets.all(20.0),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 20.0,
-        mainAxisSpacing: 20.0,
-      ),
-      itemCount: selectedItems.length,
-      itemBuilder: (context, index) {
-        return Card(
-          elevation: 5,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                selectedItems[index].name,
-                style: const TextStyle(fontSize: 18),
-              ),
-              Image.network(
-                selectedItems[index].image,
-                height: width * 0.3,
-                fit: BoxFit.cover,
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
 
 class Footer extends StatelessWidget {
   @override
@@ -316,40 +293,40 @@ class Footer extends StatelessWidget {
       color: Colors.red[900],
       child: Column(
         children: [
-        Text(
-        'Contact Us: - +961 81 605 882 // - +961 81 076 902',
-        style: TextStyle(color: Colors.white, fontSize: 16),
-      ),
-      SizedBox(height: 8),
-      Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-      IconButton(
-      icon: Icon(Icons.phone, color: Colors.black),
-      onPressed: () {
-        // Handle phone button press
-      },
-    ),
-    IconButton(
-    icon: Icon(Icons.facebook, color: Colors.black),
-    onPressed: () {
-    // Handle Facebook button press
-    },
-    ),
-            IconButton(
-              icon: FaIcon(FontAwesomeIcons.whatsapp, color: Colors.black),
-              onPressed: () {
-                // Handle WhatsApp button press
-              },
-            ),
-            IconButton(
-              icon: FaIcon(FontAwesomeIcons.instagram, color: Colors.black), // Replace with Instagram icon
-              onPressed: () {
-                // Handle Instagram button press
-              },
-            ),
-          ],
-      ),
+          Text(
+            'Contact Us: - +961 81 605 882 // - +961 81 076 902',
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+          SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                icon: Icon(Icons.phone, color: Colors.black),
+                onPressed: () {
+                  // Handle phone button press
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.facebook, color: Colors.black),
+                onPressed: () {
+                  // Handle Facebook button press
+                },
+              ),
+              IconButton(
+                icon: FaIcon(FontAwesomeIcons.whatsapp, color: Colors.black),
+                onPressed: () {
+                  // Handle WhatsApp button press
+                },
+              ),
+              IconButton(
+                icon: FaIcon(FontAwesomeIcons.instagram, color: Colors.black), // Replace with Instagram icon
+                onPressed: () {
+                  // Handle Instagram button press
+                },
+              ),
+            ],
+          ),
         ],
       ),
     );

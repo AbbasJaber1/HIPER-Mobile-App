@@ -1,8 +1,9 @@
 class Item {
   final String _name;
   final double _price;
-  bool _selected = false; // determines if an item is selected from the menu
-  final String _image; // holds image url
+  bool _selected = false;
+  final String _image;
+  int _quantity = 1;
 
   Item(this._name, this._price, this._image);
 
@@ -11,7 +12,9 @@ class Item {
   double get price => _price;
   bool get selected => _selected;
   String get image => _image;
+  int get quantity => _quantity;
   set selected(bool e) => _selected = e;
+  set quantity(int qty) => _quantity = qty;
 
   // item description is displayed in the ListView
   @override
@@ -24,7 +27,6 @@ class Item {
   }
 }
 
-// list of items, used to populate ListView
 List<Item> items = [
   Item('Burger', 7,
       "https://plus.unsplash.com/premium_photo-1667682209935-b6c87cced668?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8YnVyZ2VyfGVufDB8fDB8fHww"),
@@ -63,24 +65,3 @@ List<Item> items = [
 
 
 ];
-
-
-/*IconButton(
-                icon: FaIcon(FontAwesomeIcons.whatsapp, color: Colors.black),
-                onPressed: () {
-                  // Handle WhatsApp button press
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.camera_alt, color: Colors.black), // Replace with Instagram icon
-                onPressed: () {
-                  // Handle Instagram button press
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}*/
