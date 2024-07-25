@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'item.dart';
-//change //change3
+
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -13,6 +13,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   double _sum = 0.0;
+  int iteamselected=0;
   bool _showSelected = false;
   bool _showSearch = false;
   TextEditingController _searchController = TextEditingController();
@@ -119,6 +120,11 @@ class _HomeState extends State<Home> {
                     IconButton(
                       icon: Icon(Icons.shopping_cart, color: Colors.black),
                       onPressed: () {
+                        if (_sum != 0) {
+                          setState(() {
+                            _showSelected = !_showSelected;
+                          });
+                        }
                         // Handle the cart button press
                       },
                     ),
@@ -128,7 +134,7 @@ class _HomeState extends State<Home> {
                         radius: 8,
                         backgroundColor: Colors.black,
                         child: Text(
-                          '0', // Update this number dynamically
+                          '$iteamselected', // Update this number dynamically
                           style: TextStyle(
                             fontSize: 10,
                             color: Colors.white,
@@ -195,7 +201,7 @@ class _HomeState extends State<Home> {
                 : ListView(
               children: [
                 SizedBox(
-                  height: 100, // Height of your SizedBox
+                  height: 140, // Height of your SizedBox
                   child: Center(
                     child: Image.network(
                       _filteredItems[_currentImageIndex].image,
@@ -220,16 +226,19 @@ class _HomeState extends State<Home> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           CheckboxListTile(
-                            value: _filteredItems[index].selected,
+                            value: items[index].selected,
                             onChanged: (e) {
-                              setState(() {
-                                _filteredItems[index].selected = e ?? false;
-                                if (_filteredItems[index].selected) {
-                                  _sum += _filteredItems[index].price;
-                                } else {
-                                  _sum -= _filteredItems[index].price;
-                                }
-                              });
+                              items[index].selected = e as bool;
+                              if (items[index].selected) {
+                                // add its price to total price
+                                _sum += items[index].price;
+                                iteamselected++;
+                              } else {
+                                // subtract its price from total price
+                                _sum -= items[index].price;
+                                iteamselected--;
+                              }
+                              setState(() {});
                             },
                             title: Text(
                               _filteredItems[index].toString(),
