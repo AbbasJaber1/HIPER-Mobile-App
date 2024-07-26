@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'item.dart';
-import 'login_page.dart';
-import 'registration_page.dart';
-import 'showselected.dart';
+
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -15,7 +13,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   double _sum = 0.0;
-  int itemselected = 0;
+  int iteamselected=0;
   bool _showSelected = false;
   bool _showSearch = false;
   TextEditingController _searchController = TextEditingController();
@@ -28,10 +26,6 @@ class _HomeState extends State<Home> {
     super.initState();
     _filteredItems = items;
     _searchController.addListener(filterItems);
-
-    Future.delayed(Duration.zero, () {
-      _showOptionsBottomSheet(context);
-    });
 
     _timer = Timer.periodic(Duration(seconds: 5), (Timer t) {
       setState(() {
@@ -58,68 +52,11 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void updateSelectedItems() {
-    setState(() {
-      _sum = items.where((item) => item.selected).fold(0.0, (sum, item) => sum + item.price * item.quantity);
-      itemselected = items.where((item) => item.selected).length;
-    });
-  }
-
-  void returnToHome() {
-    setState(() {
-      _showSelected = false;
-    });
-  }
-
-  void _showOptionsBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ListTile(
-                title: Text('Register'),
-                onTap: () {
-                  Navigator.pop(context); // Close the bottom sheet
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => RegistrationPage()),
-                  );
-                },
-              ),
-              ListTile(
-                title: Text('Login'),
-                onTap: () {
-                  Navigator.pop(context); // Close the bottom sheet
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginPage()),
-                  );
-                },
-              ),
-              ListTile(
-                title: Text('Continue as Guest'),
-                onTap: () {
-                  Navigator.pop(context); // Close the bottom sheet
-                  // Add any logic for guest user if needed
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    if (MediaQuery.of(context).orientation == Orientation.landscape) {
+    if (MediaQuery.of(context).orientation == Orientation.landscape)
       screenWidth = screenWidth * 0.8;
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -175,7 +112,7 @@ class _HomeState extends State<Home> {
                 IconButton(
                   icon: Icon(Icons.person, color: Colors.black),
                   onPressed: () {
-                    _showOptionsBottomSheet(context);
+                    // Handle the person button press
                   },
                 ),
                 Stack(
@@ -197,7 +134,7 @@ class _HomeState extends State<Home> {
                         radius: 8,
                         backgroundColor: Colors.black,
                         child: Text(
-                          '$itemselected', // Update this number dynamically
+                          '$iteamselected', // Update this number dynamically
                           style: TextStyle(
                             fontSize: 10,
                             color: Colors.white,
@@ -226,10 +163,10 @@ class _HomeState extends State<Home> {
               ),
             ),
             ListTile(
-              leading: Icon(Icons.person, color: Colors.black),
+              leading: Icon(Icons.person),
               title: Text('Profile'),
               onTap: () {
-                _showOptionsBottomSheet(context);
+                // Handle profile option tap
               },
             ),
             ListTile(
@@ -253,7 +190,7 @@ class _HomeState extends State<Home> {
         children: [
           Expanded(
             child: _showSelected
-                ? ShowSelectedItems(width: screenWidth, updateSelectedItems: updateSelectedItems, returnToHome: returnToHome,)
+                ? ShowSelectedItems(width: screenWidth)
                 : _filteredItems.isEmpty
                 ? Center(
               child: Text(
@@ -289,12 +226,19 @@ class _HomeState extends State<Home> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           CheckboxListTile(
-                            value: _filteredItems[index].selected,
+                            value: items[index].selected,
                             onChanged: (e) {
-                              setState(() {
-                                _filteredItems[index].selected = e as bool;
-                                updateSelectedItems();
-                              });
+                              items[index].selected = e as bool;
+                              if (items[index].selected) {
+                                // add its price to total price
+                                _sum += items[index].price;
+                                iteamselected++;
+                              } else {
+                                // subtract its price from total price
+                                _sum -= items[index].price;
+                                iteamselected--;
+                              }
+                              setState(() {});
                             },
                             title: Text(
                               _filteredItems[index].toString(),
@@ -321,6 +265,49 @@ class _HomeState extends State<Home> {
   }
 }
 
+class ShowSelectedItems extends StatelessWidget {
+  final double width;
+  const ShowSelectedItems({super.key, required this.width});
+
+  @override
+  Widget build(BuildContext context) {
+    List<Item> selectedItems = [];
+    for (var e in items) {
+      if (e.selected) {
+        selectedItems.add(e);
+      }
+    }
+    return GridView.builder(
+      padding: const EdgeInsets.all(20.0),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 20.0,
+        mainAxisSpacing: 20.0,
+      ),
+      itemCount: selectedItems.length,
+      itemBuilder: (context, index) {
+        return Card(
+          elevation: 5,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                selectedItems[index].name,
+                style: const TextStyle(fontSize: 18),
+              ),
+              Image.network(
+                selectedItems[index].image,
+                height: width * 0.3,
+                fit: BoxFit.cover,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
 class Footer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -329,40 +316,40 @@ class Footer extends StatelessWidget {
       color: Colors.red[900],
       child: Column(
         children: [
-          Text(
-            'Contact Us: - +961 81 605 882 // - +961 81 076 902',
-            style: TextStyle(color: Colors.white, fontSize: 16),
-          ),
-          SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: Icon(Icons.phone, color: Colors.black),
-                onPressed: () {
-                  // Handle phone button press
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.facebook, color: Colors.black),
-                onPressed: () {
-                  // Handle Facebook button press
-                },
-              ),
-              IconButton(
-                icon: FaIcon(FontAwesomeIcons.whatsapp, color: Colors.black),
-                onPressed: () {
-                  // Handle WhatsApp button press
-                },
-              ),
-              IconButton(
-                icon: FaIcon(FontAwesomeIcons.instagram, color: Colors.black),
-                onPressed: () {
-                  // Handle Instagram button press
-                },
-              ),
-            ],
-          ),
+        Text(
+        'Contact Us: - +961 81 605 882 // - +961 81 076 902',
+        style: TextStyle(color: Colors.white, fontSize: 16),
+      ),
+      SizedBox(height: 8),
+      Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+      IconButton(
+      icon: Icon(Icons.phone, color: Colors.black),
+      onPressed: () {
+        // Handle phone button press
+      },
+    ),
+    IconButton(
+    icon: Icon(Icons.facebook, color: Colors.black),
+    onPressed: () {
+    // Handle Facebook button press
+    },
+    ),
+            IconButton(
+              icon: FaIcon(FontAwesomeIcons.whatsapp, color: Colors.black),
+              onPressed: () {
+                // Handle WhatsApp button press
+              },
+            ),
+            IconButton(
+              icon: FaIcon(FontAwesomeIcons.instagram, color: Colors.black), // Replace with Instagram icon
+              onPressed: () {
+                // Handle Instagram button press
+              },
+            ),
+          ],
+      ),
         ],
       ),
     );
