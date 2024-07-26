@@ -173,21 +173,7 @@ class _HomeState extends State<Home> {
                     });
                   },
                 ),
-                IconButton(
-                  icon: Icon(Icons.person, color: Colors.black),
-                  onPressed: () {
-                    _showOptionsBottomSheet(context);
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.info, color: Colors.black), // Info icon
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => AboutUsPage()), // Navigate to AboutUsPage
-                    );
-                  },
-                ),
+
                 Stack(
                   children: [
                     IconButton(
