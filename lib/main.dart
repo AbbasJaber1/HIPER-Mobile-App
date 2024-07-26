@@ -3,6 +3,7 @@ import 'home.dart';
 import 'login_page.dart';
 import 'registration_page.dart';
 import 'splash_screen.dart'; // Import the splash screen
+import 'about_us_page.dart'; // Import the About Us page
 
 void main() {
   runApp(MyApp());
@@ -21,8 +22,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/register': (context) => RegistrationPage(),
         '/login': (context) => LoginPage(),
+        '/about': (context) => AboutUsPage(), // Define the route for AboutUsPage
       },
     );
   }
 }
-

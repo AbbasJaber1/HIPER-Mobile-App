@@ -5,6 +5,7 @@ import 'item.dart';
 import 'login_page.dart';
 import 'registration_page.dart';
 import 'showselected.dart';
+import 'about_us_page.dart'; // Import the new About Us page
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -178,6 +179,15 @@ class _HomeState extends State<Home> {
                     _showOptionsBottomSheet(context);
                   },
                 ),
+                IconButton(
+                  icon: Icon(Icons.info, color: Colors.black), // Info icon
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AboutUsPage()), // Navigate to AboutUsPage
+                    );
+                  },
+                ),
                 Stack(
                   children: [
                     IconButton(
@@ -243,7 +253,10 @@ class _HomeState extends State<Home> {
               leading: Icon(Icons.info),
               title: Text('About us'),
               onTap: () {
-                // Handle about us option tap
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AboutUsPage()), // Navigate to AboutUsPage
+                );
               },
             ),
           ],
@@ -314,7 +327,7 @@ class _HomeState extends State<Home> {
                 Footer(), // The footer widget
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -338,27 +351,21 @@ class Footer extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
-                icon: Icon(Icons.phone, color: Colors.black),
+                icon: Icon(FontAwesomeIcons.instagram, color: Colors.white),
                 onPressed: () {
-                  // Handle phone button press
+                  // Instagram button logic
                 },
               ),
               IconButton(
-                icon: Icon(Icons.facebook, color: Colors.black),
+                icon: Icon(FontAwesomeIcons.facebook, color: Colors.white),
                 onPressed: () {
-                  // Handle Facebook button press
+                  // Facebook button logic
                 },
               ),
               IconButton(
-                icon: FaIcon(FontAwesomeIcons.whatsapp, color: Colors.black),
+                icon: Icon(FontAwesomeIcons.twitter, color: Colors.white),
                 onPressed: () {
-                  // Handle WhatsApp button press
-                },
-              ),
-              IconButton(
-                icon: FaIcon(FontAwesomeIcons.instagram, color: Colors.black),
-                onPressed: () {
-                  // Handle Instagram button press
+                  // Twitter button logic
                 },
               ),
             ],

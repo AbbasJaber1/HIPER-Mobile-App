@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class RegistrationPage extends StatelessWidget {
   final TextEditingController _usernameController = TextEditingController();
@@ -6,7 +8,7 @@ class RegistrationPage extends StatelessWidget {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
 
-  void _register(BuildContext context) {
+  Future<void> _register(BuildContext context) async {
     final String username = _usernameController.text;
     final String email = _emailController.text;
     final String password = _passwordController.text;
@@ -48,24 +50,50 @@ class RegistrationPage extends StatelessWidget {
       return;
     }
 
-    // Proceed with registration logic
-    // For now, we'll just show a success message
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Success'),
-        content: Text('Registration successful!'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.pushNamed(context, '/login'); // Navigate to login page after successful registration
-            },
-            child: Text('OK'),
-          ),
-        ],
-      ),
+    final response = await http.post(
+      Uri.parse('https://yourdomain.com/register.php'), // Replace with your PHP script URL
+      body: json.encode({
+        'username': username,
+        'email': email,
+        'password': password,
+      }),
+      headers: {'Content-Type': 'application/json'},
     );
+
+    final responseData = json.decode(response.body);
+
+    if (responseData['success']) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Success'),
+          content: Text('Registration successful!'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushNamed(context, '/login'); // Navigate to login page after successful registration
+              },
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Error'),
+          content: Text(responseData['message']),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   @override
