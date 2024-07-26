@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'item.dart';
+import 'dart:async';
+import 'item.dart'; // Ensure this is defined properly in your project
 import 'login_page.dart';
 import 'registration_page.dart';
 import 'showselected.dart';
-import 'about_us_page.dart'; // Import the new About Us page
+import 'about_us_page.dart';
+import 'category_page.dart'; // Import the new Category Page
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -19,15 +20,19 @@ class _HomeState extends State<Home> {
   int itemselected = 0;
   bool _showSelected = false;
   bool _showSearch = false;
+  bool _showCategoryFilter = false; // To manage category filter state
   TextEditingController _searchController = TextEditingController();
   List<Item> _filteredItems = [];
+  List<Item> _allItems = []; // Store all items for filtering
   int _currentImageIndex = 0;
   Timer? _timer;
+  String? _selectedCategory; // Track selected category
 
   @override
   void initState() {
     super.initState();
-    _filteredItems = items;
+    _allItems = items; // Initialize with all items
+    _filteredItems = _allItems; // Start with all items
     _searchController.addListener(filterItems);
 
     Future.delayed(Duration.zero, () {
@@ -35,9 +40,11 @@ class _HomeState extends State<Home> {
     });
 
     _timer = Timer.periodic(Duration(seconds: 5), (Timer t) {
-      setState(() {
-        _currentImageIndex = (_currentImageIndex + 1) % _filteredItems.length;
-      });
+      if (_filteredItems.isNotEmpty) {
+        setState(() {
+          _currentImageIndex = (_currentImageIndex + 1) % _filteredItems.length;
+        });
+      }
     });
   }
 
@@ -50,7 +57,7 @@ class _HomeState extends State<Home> {
   }
 
   void filterItems() {
-    List<Item> _items = items.where((item) {
+    List<Item> _items = _allItems.where((item) {
       return item.name.toLowerCase().contains(_searchController.text.toLowerCase());
     }).toList();
 
@@ -59,10 +66,26 @@ class _HomeState extends State<Home> {
     });
   }
 
+  void filterByCategory(String category) {
+    setState(() {
+      _selectedCategory = category;
+      _filteredItems = _allItems.where((item) => item.category == category).toList();
+      _showCategoryFilter = true; // Show the category filter button
+    });
+  }
+
+  void removeCategoryFilter() {
+    setState(() {
+      _selectedCategory = null;
+      _filteredItems = _allItems;
+      _showCategoryFilter = false; // Hide the category filter button
+    });
+  }
+
   void updateSelectedItems() {
     setState(() {
-      _sum = items.where((item) => item.selected).fold(0.0, (sum, item) => sum + item.price * item.quantity);
-      itemselected = items.where((item) => item.selected).length;
+      _sum = _allItems.where((item) => item.selected).fold(0.0, (sum, item) => sum + item.price * item.quantity);
+      itemselected = _allItems.where((item) => item.selected).length;
     });
   }
 
@@ -115,6 +138,30 @@ class _HomeState extends State<Home> {
     );
   }
 
+  void _showCategoriesBottomSheet(BuildContext context) {
+    final categories = _allItems.map((item) => item.category).toSet().toList();
+
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(16),
+          child: ListView(
+            children: categories.map((category) {
+              return ListTile(
+                title: Text(category),
+                onTap: () {
+                  Navigator.pop(context); // Close the bottom sheet
+                  filterByCategory(category);
+                },
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -145,7 +192,7 @@ class _HomeState extends State<Home> {
                 setState(() {
                   _showSearch = false;
                   _searchController.clear();
-                  _filteredItems = items;
+                  _filteredItems = _allItems;
                 });
               },
             ),
@@ -232,7 +279,7 @@ class _HomeState extends State<Home> {
               leading: Icon(Icons.category),
               title: Text('Categories'),
               onTap: () {
-                // Handle categories option tap
+                _showCategoriesBottomSheet(context);
               },
             ),
             ListTile(
@@ -250,9 +297,22 @@ class _HomeState extends State<Home> {
       ),
       body: Column(
         children: [
+
+          if (_showCategoryFilter && !_showSelected)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: removeCategoryFilter,
+                child: Text('Remove Category Filter'),
+              ),
+            ),
           Expanded(
             child: _showSelected
-                ? ShowSelectedItems(width: screenWidth, updateSelectedItems: updateSelectedItems, returnToHome: returnToHome,)
+                ? ShowSelectedItems(
+              width: screenWidth,
+              updateSelectedItems: updateSelectedItems,
+              returnToHome: returnToHome,
+            )
                 : _filteredItems.isEmpty
                 ? Center(
               child: Text(
@@ -265,10 +325,12 @@ class _HomeState extends State<Home> {
                 SizedBox(
                   height: 140, // Height of your SizedBox
                   child: Center(
-                    child: Image.network(
+                    child: _filteredItems.isNotEmpty
+                        ? Image.network(
                       _filteredItems[_currentImageIndex].image,
                       fit: BoxFit.cover,
-                    ),
+                    )
+                        : Container(),
                   ),
                 ),
                 GridView.builder(
@@ -291,7 +353,7 @@ class _HomeState extends State<Home> {
                             value: _filteredItems[index].selected,
                             onChanged: (e) {
                               setState(() {
-                                _filteredItems[index].selected = e as bool;
+                                _filteredItems[index].selected = e ?? false;
                                 updateSelectedItems();
                               });
                             },
@@ -337,21 +399,27 @@ class Footer extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
-                icon: Icon(FontAwesomeIcons.instagram, color: Colors.white),
+                icon: Icon(Icons.phone, color: Colors.black),
                 onPressed: () {
-                  // Instagram button logic
+                  // Handle phone button press
                 },
               ),
               IconButton(
-                icon: Icon(FontAwesomeIcons.facebook, color: Colors.white),
+                icon: Icon(Icons.facebook, color: Colors.black),
                 onPressed: () {
-                  // Facebook button logic
+                  // Handle Facebook button press
                 },
               ),
               IconButton(
-                icon: Icon(FontAwesomeIcons.twitter, color: Colors.white),
+                icon: FaIcon(FontAwesomeIcons.whatsapp, color: Colors.black),
                 onPressed: () {
-                  // Twitter button logic
+                  // Handle WhatsApp button press
+                },
+              ),
+              IconButton(
+                icon: FaIcon(FontAwesomeIcons.instagram, color: Colors.black),
+                onPressed: () {
+                  // Handle Instagram button press
                 },
               ),
             ],
