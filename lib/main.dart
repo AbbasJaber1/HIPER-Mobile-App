@@ -1,16 +1,28 @@
 import 'package:flutter/material.dart';
 import 'home.dart';
+import 'login_page.dart';
+import 'registration_page.dart';
+import 'splash_screen.dart'; // Import the splash screen
 
-void main() => runApp(const MyApp());
+void main() {
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Home(),
+      title: 'My App',
+      theme: ThemeData(
+        primarySwatch: Colors.red,
+      ),
+      home: SplashScreen(), // Set the splash screen as the home
+      routes: {
+        '/register': (context) => RegistrationPage(),
+        '/login': (context) => LoginPage(),
+      },
     );
   }
 }
+
