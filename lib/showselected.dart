@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'item.dart';
-
+import 'order_screen.dart';
 
 class ShowSelectedItems extends StatefulWidget {
   final double width;
   final Function updateSelectedItems;
   final Function returnToHome;
 
-  const ShowSelectedItems({super.key, required this.width, required this.updateSelectedItems, required this.returnToHome});
+  const ShowSelectedItems({
+    Key? key,
+    required this.width,
+    required this.updateSelectedItems,
+    required this.returnToHome,
+  }) : super(key: key);
 
   @override
   _ShowSelectedItemsState createState() => _ShowSelectedItemsState();
@@ -56,7 +61,12 @@ class _ShowSelectedItemsState extends State<ShowSelectedItems> {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  // Add your order now logic here
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => OrderScreen(selectedItems: selectedItems, userEmail: 'abbasmoulla68@gmail.com'), // Pass the selected items and user email
+                    ),
+                  );
                 },
                 child: const Text('Order Now'),
               ),

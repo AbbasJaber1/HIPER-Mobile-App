@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'dart:async';
 import 'item.dart';
 import 'login_page.dart';
 import 'registration_page.dart';
 import 'showselected.dart';
-import 'about_us_page.dart'; // Import the new About Us page
+import 'about_us_page.dart';
+import 'add_product.dart';
+import 'category_page.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -30,15 +35,24 @@ class _HomeState extends State<Home> {
     _filteredItems = items;
     _searchController.addListener(filterItems);
 
-    Future.delayed(Duration.zero, () {
-      _showOptionsBottomSheet(context);
-    });
+    _checkLoginStatus();
 
     _timer = Timer.periodic(Duration(seconds: 5), (Timer t) {
       setState(() {
         _currentImageIndex = (_currentImageIndex + 1) % _filteredItems.length;
       });
     });
+  }
+
+  Future<void> _checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? username = prefs.getString('username');
+
+    if (username == null) {
+      Future.delayed(Duration.zero, () {
+        _showOptionsBottomSheet(context);
+      });
+    }
   }
 
   @override
@@ -115,6 +129,17 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Future<List<String>> fetchCategoriesFromDatabase() async {
+    final response = await http.get(Uri.parse('http://hipermobile.atwebpages.com/get_categories.php'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((category) => category.toString()).toList();
+    } else {
+      throw Exception('Failed to load categories');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -179,15 +204,6 @@ class _HomeState extends State<Home> {
                     _showOptionsBottomSheet(context);
                   },
                 ),
-                IconButton(
-                  icon: Icon(Icons.info, color: Colors.black), // Info icon
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => AboutUsPage()), // Navigate to AboutUsPage
-                    );
-                  },
-                ),
                 Stack(
                   children: [
                     IconButton(
@@ -236,26 +252,42 @@ class _HomeState extends State<Home> {
               ),
             ),
             ListTile(
-              leading: Icon(Icons.person, color: Colors.black),
+              leading: Icon(Icons.person, color: Color(0xFF92271E)),
               title: Text('Profile'),
               onTap: () {
                 _showOptionsBottomSheet(context);
               },
             ),
             ListTile(
-              leading: Icon(Icons.category),
+              leading: Icon(Icons.category, color: Color(0xFF92271E)),
               title: Text('Categories'),
-              onTap: () {
-                // Handle categories option tap
+              onTap: () async {
+                List<String> categories = await fetchCategoriesFromDatabase();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CategoryPage(categories: categories),
+                  ),
+                );
               },
             ),
             ListTile(
-              leading: Icon(Icons.info),
+              leading: Icon(Icons.info, color: Color(0xFF92271E)),
               title: Text('About us'),
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AboutUsPage()), // Navigate to AboutUsPage
+                  MaterialPageRoute(builder: (context) => AboutUsPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.add, color: Color(0xFF92271E)),
+              title: Text('Add Product'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddProductPage()),
                 );
               },
             ),
@@ -266,7 +298,11 @@ class _HomeState extends State<Home> {
         children: [
           Expanded(
             child: _showSelected
-                ? ShowSelectedItems(width: screenWidth, updateSelectedItems: updateSelectedItems, returnToHome: returnToHome,)
+                ? ShowSelectedItems(
+              width: screenWidth,
+              updateSelectedItems: updateSelectedItems,
+              returnToHome: returnToHome,
+            )
                 : _filteredItems.isEmpty
                 ? Center(
               child: Text(
@@ -293,31 +329,42 @@ class _HomeState extends State<Home> {
                     crossAxisCount: 2,
                     crossAxisSpacing: 20.0,
                     mainAxisSpacing: 20.0,
+                    childAspectRatio: 2.6 / 4, // Adjust aspect ratio to your preference
                   ),
                   itemCount: _filteredItems.length,
                   itemBuilder: (context, index) {
                     return Card(
-                      elevation: 5,
+                      elevation: 10,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          CheckboxListTile(
-                            value: _filteredItems[index].selected,
-                            onChanged: (e) {
-                              setState(() {
-                                _filteredItems[index].selected = e as bool;
-                                updateSelectedItems();
-                              });
-                            },
-                            title: Text(
-                              _filteredItems[index].toString(),
-                              style: TextStyle(fontSize: 18.0),
+                          AspectRatio(
+                            aspectRatio: 1, // Keeps the image square
+                            child: Image.network(
+                              _filteredItems[index].image,
+                              fit: BoxFit.cover,
                             ),
                           ),
-                          Image.network(
-                            _filteredItems[index].image,
-                            height: 80,
-                            width: 80,
+                          Expanded(
+                            child: CheckboxListTile(
+                              value: _filteredItems[index].selected,
+                              onChanged: (e) {
+                                setState(() {
+                                  _filteredItems[index].selected = e as bool;
+                                  updateSelectedItems();
+                                });
+                              },
+                              title: Text(
+                                _filteredItems[index].name, // Assuming `name` is a property of `Item`
+                                style: TextStyle(fontSize: 18.0),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              subtitle: Text(
+                                "\$${_filteredItems[index].price.toStringAsFixed(2)}", // Price display, formatted
+                                style: TextStyle(fontSize: 15.0, color: Colors.blue),
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -327,7 +374,7 @@ class _HomeState extends State<Home> {
                 Footer(), // The footer widget
               ],
             ),
-          ),
+          )
         ],
       ),
     );
@@ -351,21 +398,27 @@ class Footer extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
-                icon: Icon(FontAwesomeIcons.instagram, color: Colors.white),
+                icon: Icon(Icons.phone, color: Colors.black),
                 onPressed: () {
-                  // Instagram button logic
+                  // Handle phone button press
                 },
               ),
               IconButton(
-                icon: Icon(FontAwesomeIcons.facebook, color: Colors.white),
+                icon: Icon(Icons.facebook, color: Colors.black),
                 onPressed: () {
-                  // Facebook button logic
+                  // Handle Facebook button press
                 },
               ),
               IconButton(
-                icon: Icon(FontAwesomeIcons.twitter, color: Colors.white),
+                icon: FaIcon(FontAwesomeIcons.whatsapp, color: Colors.black),
                 onPressed: () {
-                  // Twitter button logic
+                  // Handle WhatsApp button press
+                },
+              ),
+              IconButton(
+                icon: FaIcon(FontAwesomeIcons.instagram, color: Colors.black),
+                onPressed: () {
+                  // Handle Instagram button press
                 },
               ),
             ],
@@ -375,3 +428,4 @@ class Footer extends StatelessWidget {
     );
   }
 }
+

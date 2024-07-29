@@ -121,7 +121,7 @@ Local producer: it has 8 manufacturing units of plastic and oil paints, mattress
               child: Column(
                 children: [
                   Text(
-                    'Email: abbasmoulla68@gmail.com',
+                    'Email: abbasmoulla68@gmail.com \n abbasjaber9090@gmail.com',
                     style: GoogleFonts.roboto(
                       fontSize: 16,
                       color: Colors.black87,

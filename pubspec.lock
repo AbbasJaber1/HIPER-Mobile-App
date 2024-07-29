@@ -73,6 +73,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  file:
+    dependency: transitive
+    description:
+      name: file
+      sha256: "5fc22d7c25582e38ad9a8515372cd9a93834027aacf1801cf01164dac0ffa08c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.0.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -88,6 +96,11 @@ packages:
     version: "4.0.0"
   flutter_test:
     dependency: "direct dev"
+    description: flutter
+    source: sdk
+    version: "0.0.0"
+  flutter_web_plugins:
+    dependency: transitive
     description: flutter
     source: sdk
     version: "0.0.0"
@@ -123,6 +136,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      sha256: d6f56758b7d3014a48af9701c085700aac781a92a87a62b1333b46d8879661cf
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.19.0"
   leak_tracker:
     dependency: transitive
     description:
@@ -155,6 +176,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  logging:
+    dependency: transitive
+    description:
+      name: logging
+      sha256: "623a88c9594aa774443aa3eb2d41807a48486b5613e67599fb4c41c0ad47c340"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
+  mailer:
+    dependency: "direct main"
+    description:
+      name: mailer
+      sha256: "3b27d204ff92a20aba227c25bc6467e245b0f19f9fbbc83aa357a9b7fa40267f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.1.2"
   matcher:
     dependency: transitive
     description:
@@ -179,6 +216,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.12.0"
+  mime:
+    dependency: transitive
+    description:
+      name: mime
+      sha256: "2e123074287cc9fd6c09de8336dae606d1ddb88d9ac47358826db698c176a1f2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.5"
   path:
     dependency: transitive
     description:
@@ -199,10 +244,10 @@ packages:
     dependency: transitive
     description:
       name: path_provider_android
-      sha256: e84c8a53fe1510ef4582f118c7b4bdf15b03002b51d7c2b66983c65843d61193
+      sha256: "490539678396d4c3c0b06efdaab75ae60675c3e0c66f72bc04c2e2c1e0e2abeb"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.8"
+    version: "2.2.9"
   path_provider_foundation:
     dependency: transitive
     description:
@@ -251,6 +296,62 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
+  shared_preferences:
+    dependency: "direct main"
+    description:
+      name: shared_preferences
+      sha256: d3bbe5553a986e83980916ded2f0b435ef2e1893dfaa29d5a7a790d0eca12180
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.3"
+  shared_preferences_android:
+    dependency: transitive
+    description:
+      name: shared_preferences_android
+      sha256: "3d4571b3c5eb58ce52a419d86e655493d0bc3020672da79f72fa0c16ca3a8ec1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.4"
+  shared_preferences_foundation:
+    dependency: transitive
+    description:
+      name: shared_preferences_foundation
+      sha256: "0a8a893bf4fd1152f93fec03a415d11c27c74454d96e2318a7ac38dd18683ab7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.0"
+  shared_preferences_linux:
+    dependency: transitive
+    description:
+      name: shared_preferences_linux
+      sha256: "9f2cbcf46d4270ea8be39fa156d86379077c8a5228d9dfdb1164ae0bb93f1faa"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.2"
+  shared_preferences_platform_interface:
+    dependency: transitive
+    description:
+      name: shared_preferences_platform_interface
+      sha256: "034650b71e73629ca08a0bd789fd1d83cc63c2d1e405946f7cef7bc37432f93a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.0"
+  shared_preferences_web:
+    dependency: transitive
+    description:
+      name: shared_preferences_web
+      sha256: d762709c2bbe80626ecc819143013cc820fa49ca5e363620ee20a8b15a3e3daf
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.1"
+  shared_preferences_windows:
+    dependency: transitive
+    description:
+      name: shared_preferences_windows
+      sha256: "841ad54f3c8381c480d0c9b508b89a34036f512482c407e6df7a9c4aa2ef8f59"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.2"
   sky_engine:
     dependency: transitive
     description: flutter

@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   Future<void> _login(BuildContext context) async {
+    print("Login button clicked");
     final String username = _usernameController.text;
     final String password = _passwordController.text;
 
     if (username.isEmpty || password.isEmpty) {
-      // Show an alert dialog if any field is empty
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -29,24 +30,49 @@ class LoginPage extends StatelessWidget {
     }
 
     final response = await http.post(
-      Uri.parse('https://yourdomain.com/login.php'), // Replace with your PHP script URL
+      Uri.parse('http://hipermobile.atwebpages.com/login.php'),
+      headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'username': username,
         'password': password,
       }),
-      headers: {'Content-Type': 'application/json'},
     );
 
-    final responseData = json.decode(response.body);
+    if (response.statusCode == 200) {
+      try {
+        final responseData = json.decode(response.body);
+        if (responseData['success']) {
+          // Save user data on successful login
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('username', username);
 
-    if (responseData['success']) {
-      Navigator.pushNamed(context, '/home'); // Navigate to home page after successful login
+          Navigator.pushNamed(context, '/home'); // Navigate to home page after successful login
+        } else {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Error'),
+              content: Text(responseData['message']),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+      } catch (e) {
+        print("Error parsing JSON: $e");
+        print("Received raw response: ${response.body}");
+      }
     } else {
+      print("Network error: ${response.statusCode}");
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
           title: Text('Error'),
-          content: Text(responseData['message']),
+          content: Text('Network error. Please try again later.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),

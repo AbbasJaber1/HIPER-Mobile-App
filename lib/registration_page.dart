@@ -9,13 +9,13 @@ class RegistrationPage extends StatelessWidget {
   final TextEditingController _confirmPasswordController = TextEditingController();
 
   Future<void> _register(BuildContext context) async {
+    print("Register button clicked");
     final String username = _usernameController.text;
     final String email = _emailController.text;
     final String password = _passwordController.text;
     final String confirmPassword = _confirmPasswordController.text;
 
     if (username.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
-      // Show an alert dialog if any field is empty
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -33,7 +33,6 @@ class RegistrationPage extends StatelessWidget {
     }
 
     if (password != confirmPassword) {
-      // Show an alert dialog if passwords do not match
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -50,41 +49,61 @@ class RegistrationPage extends StatelessWidget {
       return;
     }
 
-    final response = await http.post(
-      Uri.parse('https://yourdomain.com/register.php'), // Replace with your PHP script URL
-      body: json.encode({
-        'username': username,
-        'email': email,
-        'password': password,
-      }),
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    final responseData = json.decode(response.body);
-
-    if (responseData['success']) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Success'),
-          content: Text('Registration successful!'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.pushNamed(context, '/login'); // Navigate to login page after successful registration
-              },
-              child: Text('OK'),
-            ),
-          ],
-        ),
+    try {
+      final response = await http.post(
+        Uri.parse('http://hipermobile.atwebpages.com/registration.php'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'username': username,
+          'email': email,
+          'password': password,
+        }),
       );
-    } else {
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['success']) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Success'),
+              content: Text('Registration successful!'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.pushNamed(context, '/login');
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            ),
+          );
+        } else {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Error'),
+              content: Text(responseData['message']),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+      } else {
+        throw Exception('Failed to register. Server error: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error during registration: $e');
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
           title: Text('Error'),
-          content: Text(responseData['message']),
+          content: Text('Failed to process your registration. Please try again later.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -111,7 +130,7 @@ class RegistrationPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
-                  'assets/cropped-hiperao.png', // Adjust the path to your logo
+                  'assets/cropped-hiperao.png',
                   height: 100,
                 ),
                 SizedBox(height: 20),
@@ -158,7 +177,7 @@ class RegistrationPage extends StatelessWidget {
                   onPressed: () => _register(context),
                   child: Text('Register'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red[900], // Set the background color
+                    backgroundColor: Colors.red[900],
                     padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                     textStyle: TextStyle(fontSize: 18),
                   ),
