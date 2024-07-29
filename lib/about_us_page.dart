@@ -14,14 +14,14 @@ class AboutUsPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(height: 20),
-            // Use Image.asset with BoxFit.contain to display the full image
+            // Use Image.asset with BoxFit.cover to handle aspect ratio
             Container(
-              width: 150, // Set the width of the container
-              height: 150, // Set the height of the container
+              width: 120, // Set the width of the container
+              height: 120, // Set the height of the container
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/cropped-hiperao.png'),
-                  fit: BoxFit.contain, // Ensure the image fits within the container
+                  fit: BoxFit.cover, // Ensure the image covers the space while maintaining aspect ratio
                 ),
               ),
             ),
